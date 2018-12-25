@@ -11,11 +11,11 @@ import (
 	 对于每一个叶子节点，输出从该节点到根
 	节点路径上所有数的和。
 思路：
-	实际上是一个遍历问题，利用回溯的思想，同时用栈存储 找到节点的路径
+	实际上是一个遍历问题，递归查找叶子节点，利用回溯的思想，用栈存储 找到节点的路径
     当找到节点后，计算栈中的数据和。
 **/
 func main() {
-	//构建的树
+	//构建题目中的树
 	rootNode := GenerateTree()
 
 	HeadNode := &Node{0, nil, nil}
@@ -23,11 +23,44 @@ func main() {
 	stack := &Stack{HeadNode, HeadNode}
 	//叶子节点对应的值
 	target := 13
-	//主要逻辑
+	//主要逻辑，递归查找叶子节点，同时将查找的路径存入stack
 	getLeaveNodeWithPathSum(target, rootNode, stack)
 	//遍历 stack
 	sum := stack.getAllSum()
 	fmt.Printf("叶子节点 %d 对应的和是 %d", target, sum)
+}
+
+/**
+  说明：查找一个叶子结点，并存储对应的路径
+  参数：
+	 target :叶子节点的值
+	 root : 二叉树的根
+	 stack: 存储路径的栈
+  返回的值：
+	 bool : 表示有没有找到叶子节点
+**/
+func getLeaveNodeWithPathSum(target int, root *TreeNode, stack *Stack) bool {
+
+	if root == nil {
+		return false
+	}
+	//入栈当前的值
+	stack.Push(root.value)
+
+	if root.Left == nil && root.Right == nil && root.value == target {
+		//说明找到了对应的子节点，返回true
+		return true
+	}
+	//分别从左子树和右子树种递归去找
+	flag1 := getLeaveNodeWithPathSum(target, root.Left, stack)
+	flag2 := getLeaveNodeWithPathSum(target, root.Right, stack)
+
+	if !flag1 && !flag2 {
+		//如果两个子树都没有找到，需要去掉栈顶的内容
+		stack.Pop()
+		return false
+	}
+	return true
 }
 
 //节点
@@ -63,32 +96,6 @@ func PreOrder(root *TreeNode) {
 		PreOrder(root.Left)
 		PreOrder(root.Right)
 	}
-}
-
-//根据一个叶子节点，找打对应的路径的和：
-func getLeaveNodeWithPathSum(target int, root *TreeNode, stack *Stack) bool {
-	//查找对应的子节点:
-	//入栈当前的值
-	if root == nil {
-		return false
-	}
-	stack.Push(root.value)
-
-	if root.Left == nil && root.Right == nil && root.value == target {
-		//说明找到了对应的子节点，返回true
-		return true
-	}
-	//分别从左子树和右子树种去找
-	flag1 := getLeaveNodeWithPathSum(target, root.Left, stack)
-	flag2 := getLeaveNodeWithPathSum(target, root.Right, stack)
-
-	if !flag1 && !flag2 {
-		//如果两个子树都没有找到，需要去掉栈顶的内容
-		stack.Pop()
-		return false
-	}
-	return true
-
 }
 
 //用链表实现一个栈
